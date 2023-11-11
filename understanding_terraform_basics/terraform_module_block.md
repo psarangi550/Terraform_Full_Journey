@@ -151,6 +151,60 @@
     - on each `cidr_block` ip adress , `subnet mask` will be added with the `new_bits` value, in order to create `new subnet block` in this case over here 
     network_cidr_address
     
-    - the `output block` will help in `outputting the exported data that we get from the module` in this case over here , we can also see those `export data` which been `stored in the output block` inside the `CLI`
+    - the `output block` will help in `outputting the exported data that we get from the module` in this case over here , we can also see those `export data` which been `stored in the output block` inside the `CLI` so that we can see the `result` what the `module has done for us`
     
-    -   
+    - as we are using the `A New Terraform module` , hence we need to make sure `Terraform should download the new module` , hence we need to run the `terraform init` command 
+    
+    - which will create the `.terraform` folder inside which we have the `module` and inside the `module` we can see out `subnet_addrs` module there 
+
+    ```bash
+        terraform init
+        # this will download the module from the Terraform registry and provide the info mentioned in the main.tf file 
+        # hence the output will be as below 
+
+        Initializing the backend...
+        Initializing modules...
+
+        Initializing provider plugins...
+
+        Terraform has been successfully initialized!
+
+        You may now begin working with Terraform. Try running "terraform plan" to see
+        any changes that are required for your infrastructure. All Terraform commands
+        should now work.
+
+        If you ever set or change modules or backend configuration for Terraform,
+        rerun this command to reinitialize your working directory. If you forget, other
+        commands will detect it and remind you to do so if necessary.
+            
+    ```
+
+    - then we can run the command as `terraform apply -auto-approve` which will `call` the `respective module` and `feed that with the info provided` and `respective module will perform few thing with the info tht been provided` and `output data  will be exported to the parent module` and then we can use that `data exported` to the respective `terraform CLI` over here 
+    
+    - we can use the below script for the same 
+    
+    ```bash
+        terraform apply -auto-approve # defining the terraform apply command over here 
+        # here then we can see that it will take the ip address from the base_cidr_block and add the more_bits to the subnet mask of the cidr_block and then output the New Subnet with the subent mask in here 
+        No changes. Your infrastructure matches the configuration.
+
+        Terraform has compared your real infrastructure against your configuration and found no differences, so no changes are needed.
+
+        Apply complete! Resources: 0 added, 0 changed, 0 destroyed.
+
+        Outputs:
+
+        subnet_addrs = tomap({
+        "module_network_a" = "10.0.0.0/24" # this is the first subnet which being created after adding the more_bits to the subnet mask of the cidr_block
+        "module_network_b" = "10.0.1.0/24" # this is the second subnet created after adding the more_bits to the subnet mask of the cidr_block
+        })     
+    
+
+    ```
+
+    - this will be helpful , if we are working on the `favourite cloud platform` or `on-prem` and need to split the `large cidr_block` into multiple `smaller subnets`
+    
+    - we can then deploy these `different different subnets` across the `public cloud` that we are using 
+    
+    - when we are `deploying these subnet` we can refer the `output exported data from the Terraform module thats been created` as the `input for the subnet` in here
+
