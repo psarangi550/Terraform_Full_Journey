@@ -38,6 +38,9 @@
    
    - we need to use the `public ssh key` inside the `aws key pair` which will allow terraform to connect to the `Remote Virtual Machine`
    
+   - the `aws_key_pair` will use the `myAWSKey.pem` file `public ssh` in order to `create the Public SSH for the Private token that we have saved`
+   
+   
    - for that we can define the `terraform configuration` as below 
 
 
