@@ -544,16 +544,8 @@
     }
 
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   ```
+
+- this will be really slick , as we can share the `code` along with the `lock file` to someone , when they perform the `terraform init` it will `read the Terraform Provider info` from the `.terraform.lock.hcl` dependency lock file and download the `specific Terraform Version` which being required which also match the `terraform.tf`
+
 
