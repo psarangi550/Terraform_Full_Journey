@@ -251,17 +251,19 @@
 
     
     ```
-- now we need to associate the `aws_key_pair` resource that we have created to the `aws_instance` resource
+- now we need to associate the `aws_key_pair` resource that we have created to the `aws_instance` resource with the argument as `key_name`
 
-- also we need to specify the `security group` that we have created to the `EC2` instance that we have made 
+- also we need to specify the `security_groups` that we have created to the `EC2` instance that we have made 
 
 - then we need to make a `connection block` using which the connection will be established between the `Terraform` and `AWS EC2 instance`
   
-  - here we need to make use of the `username` of the `EC2 Instance`
+  - here we need to make use of the `username` of the `EC2 Instance` using which `remote-exec` provisioner want to connect
   
-  - we also need to have the `public_ip` of the `EC2 instance` in order to connect 
+  - we also need to have the `public_ip` of the `EC2 instance` in order to connect using which `remote-exec` provisioner want to connect
   
   - we can then declare the `authentication scheme` as the `private key`  that we have saved to the `localfile` using the `Terraform Local Provider`
+
+- we also have to to mention the `associate_public_ip_address`  as `true` in this case so that we can use the `host` inside the `connection` block else we will be getting an error
   
 - we need to ensure that the `connction block` must always be created inside the `resource block` that we are using in thsi case over here 
 
@@ -608,6 +610,8 @@
 
             # associating the security group in this case over here 
 
+            associate_public_ip_address = true # we need to associate the public_key on creation as well in this case 
+
             key_name = aws_key_pair.my_key_pair.key_name
 
             # associating the aws_key_pair to the AWS EC2 instance in here through the key_name args in this case 
@@ -684,6 +688,30 @@
 - we will be defining the `remote Exec Terraform Provisioner` which will be executed in the `Remote-Ec2 instance` after the ssh connection been made successful as below 
 
 - we can define the `single line command` using it as the `command` platform and `multiple command` executed using the `inline` args with the `list of command` separated by `comma` 
+
+- we can define the `local-exec Terraform Provisioner` and `remote-exec provisioner` as below 
+
+    ```tf
+        main.tf
+        =======
+
+        resource "<resource_type>" "<resource unique name>" {
+            
+            provisioner "local-exec" {
+
+                command = "<specific command>"
+            }
+
+            provisioner "remote-exec" {
+
+                inline =[ "<command1>", "<command2>" ]
+            }
+
+        }
+
+    
+    ```
+
 
 - we can define the `local-exec Terraform Provisioner` and `remote-exec Terraform Provisioner` as below 
 
@@ -2310,10 +2338,10 @@
         aws_nat_gateway.demo_nat_gateway: Still creating... [20s elapsed]
         aws_instance.ubuntu_server: Still creating... [20s elapsed]
         aws_nat_gateway.demo_nat_gateway: Still creating... [30s elapsed]
-        aws_instance.ubuntu_server: Still creating... [30s elapsed]
-        aws_instance.ubuntu_server: Provisioning with 'local-exec'...
+        aws_instance.ubuntu_server: Still creating... [30s elapsed] # once the server ben build i.e EC2 instance running then
+        aws_instance.ubuntu_server: Provisioning with 'local-exec'... # here the local-exec provisioner kicked in here which will be executed in this terminal where the terraform apply been made
         aws_instance.ubuntu_server (local-exec): Executing: ["/bin/sh" "-c" "chmod 600  myAWSKey.pem"]
-        aws_instance.ubuntu_server: Provisioning with 'remote-exec'...
+        aws_instance.ubuntu_server: Provisioning with 'remote-exec'... # connecting to the remote EC2 instance usingthe remote-exec user in this case
         aws_instance.ubuntu_server (remote-exec): Connecting to remote host via SSH...
         aws_instance.ubuntu_server (remote-exec):   Host: 54.202.240.54
         aws_instance.ubuntu_server (remote-exec):   User: ubuntu
@@ -2354,10 +2382,10 @@
         aws_instance.ubuntu_server (remote-exec):   SSH Agent: true
         aws_instance.ubuntu_server (remote-exec):   Checking Host Key: false
         aws_instance.ubuntu_server (remote-exec):   Target Platform: unix
-        aws_instance.ubuntu_server (remote-exec): Connected!
+        aws_instance.ubuntu_server (remote-exec): Connected!  # here the remote-exec provisioner connected to the AWS EC23 instance after the SSH being successful
         aws_nat_gateway.demo_nat_gateway: Still creating... [1m0s elapsed]
         aws_instance.ubuntu_server: Still creating... [1m0s elapsed]
-        aws_instance.ubuntu_server (remote-exec): Cloning into '/tmp'...
+        aws_instance.ubuntu_server (remote-exec): Cloning into '/tmp'... # cloning the github repo onto the /tmp directory in here 
         aws_instance.ubuntu_server (remote-exec): remote: Enumerating objects: 449, done.
         aws_instance.ubuntu_server (remote-exec): remote: Counting objects:   3% (1/32)
         aws_instance.ubuntu_server (remote-exec): remote: Counting objects:   6% (2/32)
@@ -2585,6 +2613,7 @@
 
     ```
 
+- when we associate a `aws_key_pair` to the `aws_instance` i.e `EC2 instance` for the `first time` then it will going to `destroy and recreate the new AWS EC2 instance` associating it with the `aws_key_pair` , that just the nature of the `AWS EC2 instance with respect to terraform`
 
 - now we can define the `terraform state show <reference id>` in order to show th details of the `resource`, where the `reference_id` is the `resource_block_type` + `name_of_resource`
 
@@ -2612,19 +2641,19 @@
             hibernation                          = false
             id                                   = "i-0aa8cd9ac54e93722"
             instance_initiated_shutdown_behavior = "stop"
-            instance_state                       = "running"
-            instance_type                        = "t2.micro"
+            instance_state                       = "running" # current status of the EC2 instance also been created in here
+            instance_type                        = "t2.micro" # this is the size of the EC2 instance
             ipv6_address_count                   = 0
             ipv6_addresses                       = []
-            key_name                             = "myAWSKey"
+            key_name                             = "myAWSKey" # the aws_key_pair that been linked to the EC2 instance
             monitoring                           = false
             placement_partition_number           = 0
             primary_network_interface_id         = "eni-00814e5b9bd60a46e"
             private_dns                          = "ip-10-0-1-30.us-west-2.compute.internal"
-            private_ip                           = "10.0.1.30"
-            public_ip                            = "54.202.240.54"
+            private_ip                           = "10.0.1.30" # this is the private_ip address of the EC2 instnce in here 
+            public_ip                            = "54.202.240.54" # this is the public ip address of the EC2 instance in here
             secondary_private_ips                = []
-            security_groups                      = [
+            security_groups                      = [ # here it will list of security group that been created in here 
                 "sg-0197b954253770d9b",
                 "sg-0db59f25134e07f11",
                 "sg-0f50cf8fdb01b99c9",
@@ -2697,6 +2726,56 @@
 - we can see the output as below while accessing it 
 
 - ![Alt text](image-3.png)
+
+
+- we can also validate that we can `directly ssh` onto the machine in this case over here as below 
+
+    ```bash
+        ssh -i <location of the SSH key> <username>@<public ip of the ubuntu instance>
+        # here we can use the above command to login to the EC2 instance as it allow the TCP port 22 for SSH connection
+        # hence we can specify that as below 
+        ssh -i myAWSKey.pem ubuntu@54.202.240.54
+        # this might ask for the fingerprint validation in this case here 
+        # we can see that we are successfully able to login to the EC2 instance as well in this case
+        The authenticity of host '35.89.170.195 (35.89.170.195)' can't be established.
+        ED25519 key fingerprint is SHA256:CWn9+YGFToq6YlprzqDQPZOkVCN+Moz79DuXhwuyXL4.
+        This key is not known by any other names
+        Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+        Warning: Permanently added '35.89.170.195' (ED25519) to the list of known hosts.
+        Welcome to Ubuntu 20.04.6 LTS (GNU/Linux 5.15.0-1049-aws x86_64)
+
+        * Documentation:  https://help.ubuntu.com
+        * Management:     https://landscape.canonical.com
+        * Support:        https://ubuntu.com/advantage
+
+        System information as of Wed Nov 15 10:53:05 UTC 2023
+
+        System load:  0.04              Processes:             101
+        Usage of /:   21.7% of 7.57GB   Users logged in:       0
+        Memory usage: 20%               IPv4 address for eth0: 10.0.1.105
+        Swap usage:   0%
+
+
+        Expanded Security Maintenance for Applications is not enabled.
+
+        0 updates can be applied immediately.
+
+        Enable ESM Apps to receive additional future security updates.
+        See https://ubuntu.com/esm or run: sudo pro status
+
+
+        The list of available updates is more than a week old.
+        To check for new updates run: sudo apt update
+        New release '22.04.3 LTS' available.
+        Run 'do-release-upgrade' to upgrade to it.
+
+
+        Last login: Wed Nov 15 10:49:57 2023 from 167.103.7.6
+        ubuntu@ip-10-0-1-105:~$ 
+    
+    ```
+
+- this is what `connection block` does inside the `AWS EC2 instance` resource in this case over here 
 
 
 
