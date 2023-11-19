@@ -55,10 +55,10 @@ resource "aws_subnet" "private_subnet" {
 }
 
 
-resource "aws_instance" "amazon_linux" {
+# resource "aws_instance" "amazon_linux" {
 
-  ami = "ami-093467ec28ae4fe03"
-  instance_type = "t2.micro"
+#   ami = "ami-093467ec28ae4fe03"
+#   instance_type = "t2.micro"
 
-} 
+# } 
 
